@@ -814,3 +814,8 @@ body{font-family:'Cairo',Tahoma,Arial,sans-serif!important}
  #receipt .receipt-head{padding-top:0!important;margin-top:0!important}
  #receipt .receipt-head>:first-child{margin-top:0!important}
 }
+
+#receipt .milo-receipt-logo{max-width:calc(30mm * var(--milo-logo-scale,1))!important;max-height:calc(14mm * var(--milo-logo-scale,1))!important}
+#receipt[data-paper="58"] .milo-receipt-logo{max-width:calc(24mm * var(--milo-logo-scale,1))!important;max-height:calc(11mm * var(--milo-logo-scale,1))!important}
+#receipt .milo-receipt-policy,#receipt .milo-receipt-extra{white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px;font-weight:400;margin-top:5px;break-inside:avoid}
+#receipt .qr-area{break-inside:avoid;page-break-inside:avoid}
