@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#00867f">
+  <meta name="description" content="كاشير ميلو — منصة إدارة المبيعات والمخزون والفواتير باللغة العربية">
+  <title>كاشير ميلو | العملاء</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="startup.js"></script>
+  <script defer src="icons.js"></script>
+  <script defer src="offline-sync.js"></script>
+  <script defer src="milo-bridge.js?v=363"></script>
+  <script defer src="app.js"></script>
+  <script defer src="pwa.js"></script>
+  <script defer src="direct-print.js?v=360"></script>
+</head>
+<body data-initial-page="customers">
+<section id="loginScreen" class="login-screen">
+  <div class="login-layout">
+    <div class="login-hero">
+      <div class="brand-emblem large">M</div>
+      <p class="eyebrow light-text">كاشير ميلو | إدارة المبيعات</p>
+      <h1>إدارة أعمالك<br><span>بهوية تليق بطموحك.</span></h1>
+      <p>مبيعات أكثر تنظيمًا، مخزون موحّد، فواتير واضحة، وتقارير تساعدك على إدارة متجرك.</p>
+      <div class="hero-chips"><span>◈ نقطة بيع</span><span>◈ تقارير</span><span>◈ مخزون</span><span>◈ عدة كاشيرات</span></div>
+      <div class="hero-foot">كاشير ميلو · إدارة الأعمال</div>
+    </div>
+    <div class="login-form-side">
+      <div class="brand-inline"><span class="brand-emblem">M</span><div><strong>كاشير ميلو</strong><small>نظام نقاط البيع والإدارة</small></div></div>
+      <p class="eyebrow">تسجيل الدخول</p>
+      <h2>مرحبًا بعودتك</h2>
+      <p class="muted">استخدم بيانات المتجر المسجلة في قاعدة البيانات السحابية.</p>
+      <form id="loginForm" autocomplete="on">
+        <label>اسم المستخدم<input id="loginUser" name="username" class="input" autocomplete="username" required placeholder="اسم المستخدم"></label>
+        <label>كلمة المرور<input id="loginPass" name="password" class="input" type="password" autocomplete="current-password" required placeholder="كلمة المرور"></label>
+        <button id="loginBtn" class="btn primary block" type="submit">الدخول إلى لوحة التحكم <span>←</span></button>
+      </form>
+      <div id="loginError" class="error-text" role="alert"></div>
+      <p class="small-note">يجب توفر اتصال فعلي بالخادم. لا تحفظ الواجهة كلمات المرور على الجهاز.</p>
+      <div class="login-bottom">MILO CASHIER · صُنع في السعودية</div>
+    </div>
+  </div>
+</section>
+
+<div id="app" class="app hidden">
+  <header class="topbar">
+    <div class="topbar-row">
+      <div class="header-start"><button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="فتح أو إغلاق القائمة" aria-controls="mainNav" aria-expanded="true" title="فتح أو إغلاق القائمة"><span class="hamburger-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span></button>
+      <div class="brand-inline"><span class="brand-emblem">M</span><div><strong>كاشير ميلو</strong><small id="storeTitle">نظام نقاط البيع</small></div></div></div>
+      <div class="header-tools"><button type="button" id="syncQueueButton" class="sync-queue-pill" data-action="view-sync-queue" title="مزامنة الفواتير المعلقة" aria-live="polite">بانتظار المزامنة: <b id="syncQueueCount">0</b></button><span class="connection" id="connection" aria-live="polite"><i></i> التحقق من الاتصال</span><button class="btn outline tiny" id="installAppButton" type="button" hidden>تثبيت التطبيق</button><div class="account-menu" id="accountMenu"><button type="button" class="account-trigger" id="accountTrigger" aria-haspopup="true" aria-expanded="false" aria-controls="accountDropdown"><span class="account-circle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span><span class="account-label"><strong id="userName">حساب المتجر</strong><small>الحساب والخيارات</small></span><span class="account-chevron" aria-hidden="true">⌄</span></button><div class="account-dropdown" id="accountDropdown" hidden><div class="account-dropdown-head"><b id="accountMenuOwner">حساب المتجر</b><small id="accountMenuStore">إدارة الحساب</small></div><button type="button" data-action="go-account">حسابي والاشتراك</button><button type="button" class="account-logout" data-action="logout">تسجيل الخروج</button></div></div></div>
+    </div>
+  </header>
+  <div class="sidebar-scrim" id="sidebarScrim" hidden></div>
+  <aside class="pos-sidebar" id="sidebar" aria-label="القائمة الجانبية">
+    <div class="side-brand"><div class="side-brand-symbol">M</div><div class="sidebar-label"><b>كاشير ميلو</b><small>لوحة إدارة الأعمال</small></div></div>
+    <div class="sidebar-scroll"><nav id="mainNav" class="side-menu" aria-label="القائمة الرئيسية"></nav></div>
+    <div class="side-footer"><span class="side-footer-dot"></span><div class="sidebar-label"><b>نظام نقاط البيع</b><small>إدارة ومزامنة مركزية</small></div></div>
+  </aside>
+  <main class="workspace">
+    <div class="page-header"><div><p class="eyebrow" id="pageEyebrow">كاشير ميلو</p><h1 id="pageTitle">نقطة البيع</h1><p class="muted" id="pageSub">نظام متكامل لإدارة عمليات المتجر.</p></div><div class="header-actions" id="headerActions"></div></div>
+    <div id="content" class="page-content"></div>
+  </main>
+  <footer class="main-footer"><span>© كاشير ميلو — إدارة المتاجر باحترافية</span><span id="footerText">اتصال مركزي إلزامي لحفظ المبيعات · تطبيق قابل للتثبيت</span></footer>
+</div>
+
+<div class="backdrop hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-panel"><div class="modal-head"><div><small>كاشير ميلو</small><h2 id="modalTitle"></h2></div><button class="icon-button" type="button" data-action="close-modal" aria-label="إغلاق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div><div id="modalContent" class="modal-content"></div><div id="modalActions" class="modal-actions"></div></div>
+</div>
+<div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+<div id="receipt" class="print-receipt" aria-hidden="true"></div>
+<section id="accountBlockedScreen" class="account-blocked-screen hidden" role="alertdialog" aria-modal="true" aria-labelledby="accountBlockedTitle" dir="rtl">
+  <div class="account-blocked-card"><div class="account-blocked-mark" aria-hidden="true">!</div>
+    <p class="account-blocked-brand">MILO CASHIER</p>
+    <h1 id="accountBlockedTitle">تم إيقاف الحساب</h1>
+    <p id="accountBlockedReason">تم إغلاق الحساب أو إيقاف اشتراك المتجر. يرجى التواصل مع إدارة النظام.</p>
+    <p class="account-blocked-hint">تم إيقاف استخدام الكاشير على هذا الجهاز. لم تُحذف البيانات المحلية.</p>
+    <button type="button" class="btn primary" onclick="location.reload()">إعادة التحقق</button>
+  </div>
+</section>
+</body>
+</html>
