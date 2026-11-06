@@ -18,8 +18,8 @@ async function qrAsPng(svg){
  const blob=new Blob([source],{type:"image/svg+xml;charset=utf-8"});const url=URL.createObjectURL(blob);
  try {
   const image=new Image();image.src=url;await image.decode();
-  const canvas=document.createElement("canvas");canvas.width=320;canvas.height=320;const ctx=canvas.getContext("2d");
-  ctx.fillStyle="#fff";ctx.fillRect(0,0,320,320);ctx.imageSmoothingEnabled=false;ctx.drawImage(image,0,0,320,320);return canvas.toDataURL("image/png");
+  const canvas=document.createElement("canvas");canvas.width=400;canvas.height=400;const ctx=canvas.getContext("2d");
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,400,400);ctx.imageSmoothingEnabled=false;ctx.drawImage(image,0,0,400,400);return canvas.toDataURL("image/png");
  } finally {URL.revokeObjectURL(url)}
 }
 async function payload(html,receiptType="customer"){
@@ -36,9 +36,9 @@ async function payload(html,receiptType="customer"){
  const orderNumber=txt(root.querySelector('.milo-order-number strong'))||field('الطلب');
  const dateRaw=field('التاريخ');const dateParsed=new Date(dateRaw);
  const tax=txt(root.querySelector('.milo-vat-at-top')).replace(/[^0-9]/g,'');
- const logoBase64=isKitchen?null:await imageAsPng(root.querySelector(".milo-receipt-logo"));
+ const logoBase64=isKitchen?null:await imageAsPng(root.querySelector(".milo-receipt-logo"),440);
  const qrBase64=isKitchen?null:await qrAsPng(root.querySelector(".qr-area svg"));
- return {logoBase64,qrBase64,receiptType:isKitchen?'kitchen':'customer',store:txt(root.querySelector('.receipt-head h2'))||'MILO CASHIER',subtitle:txt(root.querySelector('.receipt-head .receipt-sub')),number,orderNumber,cashier:field('الكاشير'),paymentMethod:field('طريقة الدفع'),taxNumber:tax,items:rows,subtotal:sum('المجموع الفرعي'),vat:sum('ضريبة القيمة المضافة'),total:sum('الإجمالي المستحق')||sum('الإجمالي'),dateTime:Number.isNaN(dateParsed.getTime())?null:dateParsed.toISOString(),footer:txt(root.querySelector('.receipt-footer'))||'شكرًا لزيارتكم',returnPolicy:txt(root.querySelector('.milo-receipt-policy')),extraFooter:txt(root.querySelector('.milo-receipt-extra')),qrSize:Number(localStorage.getItem('milo_receipt_qr_size')||120),logoSize:Number(localStorage.getItem('milo_receipt_logo_size')||70)};
+ return {logoBase64,qrBase64,receiptType:isKitchen?'kitchen':'customer',store:txt(root.querySelector('.receipt-head h2'))||'MILO CASHIER',subtitle:txt(root.querySelector('.receipt-head .receipt-sub')),branch:txt(root.querySelector('.milo-branch')).replace(/^الفرع:\s*/,''),number,orderNumber,cashier:field('الكاشير'),paymentMethod:field('طريقة الدفع')||txt(summary.find(x=>txt(x.querySelector('span')).includes('طريقة الدفع'))?.querySelector('b')),taxNumber:tax,items:rows,subtotal:sum('المجموع الفرعي'),vat:sum('ضريبة القيمة المضافة'),cash:sum('نقدًا'),card:sum('شبكة'),change:sum('الباقي للعميل'),taxInclusive:!!root.querySelector('.receipt-tax-note'),total:sum('الإجمالي المستحق')||sum('الإجمالي'),dateTime:Number.isNaN(dateParsed.getTime())?null:dateParsed.toISOString(),footer:(()=>{const e=root.querySelector('.receipt-footer')?.cloneNode(true);e?.querySelectorAll('.milo-receipt-policy,.milo-receipt-extra').forEach(x=>x.remove());return txt(e)||'شكرًا لزيارتكم'})(),returnPolicy:txt(root.querySelector('.milo-receipt-policy')),extraFooter:txt(root.querySelector('.milo-receipt-extra')),qrSize:Number(localStorage.getItem('milo_receipt_qr_size')||120),logoSize:Number(localStorage.getItem('milo_receipt_logo_size')||70)};
 }
 async function send(data){const token=localStorage.getItem('milo_bridge_token')||'';if(!token)throw Error('أدخل مفتاح الربط في إعدادات الطباعة');let res;try{res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','X-MILO-Token':token},body:JSON.stringify(data),signal:AbortSignal.timeout(15000)})}catch(e){throw Error('تعذر الاتصال ببرنامج MILO Print Bridge: '+e.message)}if(!res.ok)throw Error('رفض برنامج الطباعة الطلب (HTTP '+res.status+'): '+(await res.text()).slice(0,160));return true;}
 async function printTask(task){const data=await payload(task.html,task.receiptType||"customer");await send(data);return true;}

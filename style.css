@@ -819,3 +819,11 @@ body{font-family:'Cairo',Tahoma,Arial,sans-serif!important}
 #receipt[data-paper="58"] .milo-receipt-logo{max-width:calc(24mm * var(--milo-logo-scale,1))!important;max-height:calc(11mm * var(--milo-logo-scale,1))!important}
 #receipt .milo-receipt-policy,#receipt .milo-receipt-extra{white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px;font-weight:400;margin-top:5px;break-inside:avoid}
 #receipt .qr-area{break-inside:avoid;page-break-inside:avoid}
+
+/* Enhanced thermal receipt sizes; printer-driver may impose physical constraints */
+#receipt .milo-receipt-logo{max-width:calc(40mm * var(--milo-logo-scale,1))!important;max-height:calc(22mm * var(--milo-logo-scale,1))!important;width:auto;height:auto;object-fit:contain}
+#receipt[data-paper="58"] .milo-receipt-logo{max-width:calc(28mm * var(--milo-logo-scale,1))!important;max-height:calc(17mm * var(--milo-logo-scale,1))!important}
+#receipt .milo-order-number{border:3px solid black!important;border-radius:5px!important;padding:8px!important}
+#receipt .milo-order-number strong{font-size:34px!important}
+#receipt .milo-receipt-policy{font-size:12px!important;border-top:1px dashed #000;padding-top:5px}
+#receipt .qr-area svg{max-width:95%!important;height:auto!important}
