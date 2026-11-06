@@ -389,7 +389,7 @@ function prepareContinuousBrowserPage(html,paper){
   return pageMm;
 }
 function queueReceiptHtml(html,paper,options={}){
- const tasks=[{html,paper}];if(options.kitchen)tasks.push({html:kitchenTicketHtml(options.kitchen,paper),paper});
+ const tasks=[{html,paper,receiptType:"customer"}];if(options.kitchen)tasks.push({html:kitchenTicketHtml(options.kitchen,paper),paper,receiptType:"kitchen"});
  // Jobs must run in order, not concurrently: a second job can otherwise collide with the first.
  const job=async()=>{if(localStorage.getItem("milo_print_mode")==="bridge"){if(!window.MiloPrintBridge)throw Error("ملف ربط الطابعة غير متاح");for(const task of tasks)await window.MiloPrintBridge.printTask(task);return;}if(localStorage.getItem("milo_direct_mode")==="1"){if(!window.MiloDirectPrint)throw Error("ملف الطباعة المباشرة غير متاح");for(const task of tasks)await window.MiloDirectPrint.printTask(task);return;} if(options.drawer&&window.miloDesktop?.openDrawer){try{await window.miloDesktop.openDrawer()}catch(e){toast('تعذر فتح درج المال: '+String(e?.message||e),true)}}for(const task of tasks){
    // Browser-compatible printing: print the actual receipt element already present in
@@ -425,7 +425,7 @@ function queueReceiptHtml(html,paper,options={}){
      }
      // Unlike the native job callback, window.print() has no reliable completion
      // notification across browsers. The delay is for browser-only fallback.
-     await new Promise(resolve=>setTimeout(resolve,800));
+     await new Promise(resolve=>setTimeout(resolve,2000));
    }
   }};
  const next=receiptPrintQueue.then(job,job);

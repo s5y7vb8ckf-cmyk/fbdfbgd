@@ -22,11 +22,13 @@ async function qrAsPng(svg){
   ctx.fillStyle="#fff";ctx.fillRect(0,0,320,320);ctx.imageSmoothingEnabled=false;ctx.drawImage(image,0,0,320,320);return canvas.toDataURL("image/png");
  } finally {URL.revokeObjectURL(url)}
 }
-async function payload(html,kitchen=false){
+async function payload(html,receiptType="customer"){
  const doc=new DOMParser().parseFromString(html,'text/html');const root=doc.querySelector('#receipt');if(!root)throw Error('الفاتورة غير موجودة');
  const fields=[...root.querySelectorAll('.receipt-grid > div')];
  const field=(label)=>txt(fields.find(x=>txt(x.querySelector('span')).includes(label))?.querySelector('b'));
- const isKitchen=root.classList.contains('milo-special-ticket')&&txt(root.querySelector('.receipt-head h2')).includes('المطبخ');
+ // Never infer the ticket type solely from display text; the print queue supplies it.
+ const isKitchen=receiptType==='kitchen';
+ if(!['kitchen','customer'].includes(receiptType))throw Error('نوع المستند غير معروف');
  const rows=[...root.querySelectorAll('.receipt-items tbody tr')].map(tr=>{const td=[...tr.querySelectorAll('td')];return {name:txt(td[0]?.querySelector('.item-main')||td[0]),qty:money(txt(td[1]))||1,price:isKitchen?0:money(txt(td[2])),lineTotal:money(txt(td[3]))}});
  const summary=[...root.querySelectorAll('.receipt-summary .rline')];
  const sum=(label)=>money(txt(summary.find(x=>txt(x.querySelector('span')).includes(label))?.querySelector('b')));
@@ -39,6 +41,6 @@ async function payload(html,kitchen=false){
  return {logoBase64,qrBase64,receiptType:isKitchen?'kitchen':'customer',store:txt(root.querySelector('.receipt-head h2'))||'MILO CASHIER',subtitle:txt(root.querySelector('.receipt-head .receipt-sub')),number,orderNumber,cashier:field('الكاشير'),paymentMethod:field('طريقة الدفع'),taxNumber:tax,items:rows,subtotal:sum('المجموع الفرعي'),vat:sum('ضريبة القيمة المضافة'),total:sum('الإجمالي المستحق')||sum('الإجمالي'),dateTime:Number.isNaN(dateParsed.getTime())?null:dateParsed.toISOString(),footer:txt(root.querySelector('.receipt-footer'))||'شكرًا لزيارتكم',returnPolicy:txt(root.querySelector('.milo-receipt-policy')),extraFooter:txt(root.querySelector('.milo-receipt-extra')),qrSize:Number(localStorage.getItem('milo_receipt_qr_size')||120),logoSize:Number(localStorage.getItem('milo_receipt_logo_size')||70)};
 }
 async function send(data){const token=localStorage.getItem('milo_bridge_token')||'';if(!token)throw Error('أدخل مفتاح الربط في إعدادات الطباعة');let res;try{res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','X-MILO-Token':token},body:JSON.stringify(data),signal:AbortSignal.timeout(15000)})}catch(e){throw Error('تعذر الاتصال ببرنامج MILO Print Bridge: '+e.message)}if(!res.ok)throw Error('رفض برنامج الطباعة الطلب (HTTP '+res.status+'): '+(await res.text()).slice(0,160));return true;}
-async function printTask(task){const data=await payload(task.html,false);await send(data);return true;}
+async function printTask(task){const data=await payload(task.html,task.receiptType||"customer");await send(data);return true;}
 window.MiloPrintBridge={printTask};
 })();
