@@ -827,3 +827,10 @@ body{font-family:'Cairo',Tahoma,Arial,sans-serif!important}
 #receipt .milo-order-number strong{font-size:34px!important}
 #receipt .milo-receipt-policy{font-size:12px!important;border-top:1px dashed #000;padding-top:5px}
 #receipt .qr-area svg{max-width:95%!important;height:auto!important}
+
+/* MILO V4 - formal sale confirmation */
+.milo-payment-status{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;background:rgba(15,23,42,.36);opacity:0;pointer-events:none;transition:opacity .2s ease;direction:rtl}
+.milo-payment-status.show{opacity:1;pointer-events:auto}
+.milo-payment-status-card{background:#fff;color:#143047;padding:36px 45px;text-align:center;border-radius:22px;box-shadow:0 25px 70px rgba(0,0,0,.23);min-width:min(350px,90vw);border:1px solid #e2e8f0}
+.milo-payment-check{display:grid;place-items:center;margin:0 auto 15px;border-radius:50%;background:#e9f8f0;color:#14844d;font-size:42px;font-weight:800;width:83px;height:83px;border:3px solid #26a76b}
+.milo-payment-status-card h2{margin:0 0 9px;font-size:25px}.milo-payment-status-card p{margin:0;color:#607282;font-size:14px}
