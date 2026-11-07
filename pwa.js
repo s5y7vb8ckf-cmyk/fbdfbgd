@@ -1,56 +1,32 @@
-/* MILO CASHIER PWA: installation initiated only by direct user click. */
+/* MILO install: never auto-install; use native browser prompt only on user's click. */
 (() => {
-  let installPrompt = null;
-  const installBtn = document.getElementById('installAppButton');
-  const installed = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  const markState = enabled => {
-    document.body.dataset.canInstall = enabled ? '1' : '0';
-    if (typeof renderBrowserInstallNotice === 'function') renderBrowserInstallNotice(enabled);
-  };
-  const syncButton = () => {
-    if (installBtn) installBtn.hidden = installed() || !installPrompt;
-    markState(!installed() && !!installPrompt);
-  };
-  const showHelp = (title, body) => {
-    if (typeof showModal === 'function') {
-      showModal(title, `<div class="stack"><p>${body}</p></div>`,
-        [{label:'إغلاق', onClick: closeModal}]);
-    } else {
-      window.alert(body.replace(/<[^>]*>/g, ' '));
-    }
-  };
-  window.miloInstallApp = async () => {
-    if (installed()) {
-      showHelp('التطبيق مثبت بالفعل', 'كاشير ميلو يعمل حاليًا كتطبيق مستقل على هذا الجهاز.');
-      return;
-    }
-    if (installPrompt) {
-      const prompt = installPrompt;
-      installPrompt = null;
-      syncButton();
-      try {
-        await prompt.prompt();
-        const choice = await prompt.userChoice;
-        if (choice?.outcome === 'accepted') return;
-      } catch (err) {
-        console.warn('PWA install prompt:', err);
-      }
-    }
-    showHelp('تثبيت كاشير ميلو',
-      'لتثبيت التطبيق افتح الموقع عبر HTTPS في Chrome أو Edge، ثم من قائمة المتصفح اختر <b>تثبيت التطبيق</b> أو <b>التطبيقات ← تثبيت هذا الموقع كتطبيق</b>. في Edge يمكن استخدام زر التثبيت الموجود بجانب شريط العنوان. إذا كنت تفتح ملف HTML مباشرة فلن يتوفر تثبيت PWA.');
-  };
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.warn));
+  let deferredPrompt = null;
+  const button = document.getElementById('installAppButton');
+  const isInstalled = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  function syncUI() {
+    if (button) {button.hidden = isInstalled(); button.textContent = 'تثبيت على الجهاز';}
+    document.body.dataset.canInstall = !isInstalled() ? '1' : '0';
   }
-  window.addEventListener('beforeinstallprompt', event => {
-    event.preventDefault();
-    installPrompt = event;
-    syncButton();
-  });
-  window.addEventListener('appinstalled', () => {
-    installPrompt = null;
-    syncButton();
-  });
-  installBtn?.addEventListener('click', () => window.miloInstallApp());
-  syncButton();
+  function showHelp(message) {
+    const title='تثبيت كاشير ميلو على اللابتوب';
+    if (typeof window.showModal === 'function' && typeof window.closeModal === 'function') {
+      window.showModal(title, `<div class="stack"><p>${message}</p></div>`, [{label:'إغلاق',onClick:window.closeModal}]);
+    } else window.alert(message.replace(/<[^>]*>/g,' '));
+  }
+  window.miloInstallApp = async function () {
+    if (isInstalled()) return showHelp('التطبيق مثبت ويعمل بالفعل في نافذة مستقلة.');
+    if (!window.isSecureContext || location.protocol==='file:') return showHelp('لتثبيت التطبيق، انشر ملفات ميلو على رابط HTTPS وافتح الرابط في Chrome أو Edge. التشغيل من ملف HTML مباشرة لا يدعم تثبيت PWA.');
+    if (deferredPrompt) {
+      const prompt=deferredPrompt;deferredPrompt=null;
+      try {await prompt.prompt();const result=await prompt.userChoice;if(result && result.outcome==='accepted'){syncUI();return;}} catch(e) { console.warn('MILO install:',e); }
+    }
+    showHelp('في <b>Microsoft Edge</b>: من قائمة (...) اختر <b>التطبيقات ← تثبيت هذا الموقع كتطبيق</b>.<br>في <b>Google Chrome</b>: اختر <b>تثبيت كاشير ميلو</b> من رمز التثبيت في شريط العنوان أو من قائمة المتصفح. تأكد من فتح رابط HTTPS لا ملفًا محليًا.');
+  };
+  window.addEventListener('beforeinstallprompt', event => {event.preventDefault();deferredPrompt=event;syncUI();});
+  window.addEventListener('appinstalled',()=>{deferredPrompt=null;syncUI();});
+  button?.addEventListener('click',()=>window.miloInstallApp());
+  if ('serviceWorker' in navigator && (location.protocol==='https:' || ['localhost','127.0.0.1'].includes(location.hostname))) {
+    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('MILO SW:',e)));
+  }
+  syncUI();
 })();

@@ -1,26 +1,36 @@
 {
-  "name": "كاشير ميلو — نظام نقاط البيع",
+  "name": "كاشير ميلو | MILO CASHIER",
   "short_name": "كاشير ميلو",
-  "description": "واجهة نقاط بيع عربية تعمل عبر المتصفح مع حفظ المبيعات على خادم المتجر",
+  "description": "كاشير ميلو — نظام نقاط البيع وإدارة المبيعات",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f8faf9",
-  "theme_color": "#00867f",
+  "background_color": "#ffffff",
+  "theme_color": "#008f88",
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
+  ],
+  "id": "./index.html",
+  "display_override": [
+    "standalone"
   ]
 }

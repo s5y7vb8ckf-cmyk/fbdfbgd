@@ -1,6 +1,6 @@
 /* Offline shell: pending unconfirmed invoices are stored in IndexedDB by app code; never cache authenticated API responses. */
-const VERSION='milo-static-browser-v12-reports';
-const STATIC=['./','./index.html','./sale.html','./products.html','./invoices.html','./reports.html','./inventory.html','./shifts.html','./settings.html','./customers.html','./purchases.html','./style.css','./app.js','./offline-sync.js','./icons.js','./pwa.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/milo-mark.svg'];
+const VERSION='milo-static-browser-v13-install-brand';
+const STATIC=['./','./index.html','./sale.html','./products.html','./invoices.html','./reports.html','./inventory.html','./shifts.html','./settings.html','./customers.html','./purchases.html','./style.css','./app.js','./startup.js','./milo-bridge.js','./direct-print.js','./offline-sync.js','./icons.js','./pwa.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-maskable-512.png','./icons/favicon.ico','./icons/milo-mark.svg'];
 self.addEventListener('install', event => event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(STATIC)).then(()=>self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('milo-static-')&&k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch', event => {
