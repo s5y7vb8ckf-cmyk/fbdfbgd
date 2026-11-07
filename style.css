@@ -860,3 +860,12 @@ body{font-family:'Cairo',Tahoma,Arial,sans-serif!important}
 @media(prefers-reduced-motion:reduce){.milo-loading-mark i,.milo-loading-progress span{animation:none}}
 @media(max-width:480px){.milo-loading-card{padding:30px 20px}.milo-loading-card h2{font-size:20px}}
 @media print{.milo-login-loading{display:none!important}}
+
+/* V11 — two polished, progress-driven intro slides; never block login completion. */
+.milo-loading-slides{position:relative;min-height:106px;display:grid;place-items:center;overflow:hidden;margin:13px 0 2px}
+.milo-loading-slide{grid-area:1/1;opacity:0;transform:translateY(13px) scale(.97);transition:opacity .27s ease,transform .27s ease;pointer-events:none;width:100%;visibility:hidden}
+.milo-loading-slide.is-active{opacity:1;transform:translateY(0) scale(1);visibility:visible}
+.milo-loading-slide h2{font-size:clamp(18px,3.5vw,22px);line-height:1.75;margin:2px 0 3px;color:#123f36}
+.milo-slide-label{font-size:12px;color:#127c64;font-weight:800;letter-spacing:.3px}
+.milo-saudi-mark{display:inline-grid;place-items:center;width:29px;height:29px;margin-bottom:2px;border-radius:50%;background:#e0f2e9;color:#0c775d;font-size:20px}
+@media(prefers-reduced-motion:reduce){.milo-loading-slide{transition:none;transform:none}}
