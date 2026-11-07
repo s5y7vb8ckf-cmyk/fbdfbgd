@@ -834,3 +834,8 @@ body{font-family:'Cairo',Tahoma,Arial,sans-serif!important}
 .milo-payment-status-card{background:#fff;color:#143047;padding:36px 45px;text-align:center;border-radius:22px;box-shadow:0 25px 70px rgba(0,0,0,.23);min-width:min(350px,90vw);border:1px solid #e2e8f0}
 .milo-payment-check{display:grid;place-items:center;margin:0 auto 15px;border-radius:50%;background:#e9f8f0;color:#14844d;font-size:42px;font-weight:800;width:83px;height:83px;border:3px solid #26a76b}
 .milo-payment-status-card h2{margin:0 0 9px;font-size:25px}.milo-payment-status-card p{margin:0;color:#607282;font-size:14px}
+
+/* MILO V5 — dedicated order barcode at the bottom of every customer receipt */
+#receipt .milo-order-barcode{display:block;clear:both;text-align:center;margin:3mm auto 1mm;break-inside:avoid;page-break-inside:avoid;max-width:100%;overflow:hidden}
+#receipt .milo-order-barcode svg{display:block;width:96%!important;max-width:100%;height:18mm!important;margin:0 auto;image-rendering:pixelated}
+#receipt .milo-order-barcode-number{font-size:10px;font-weight:700;direction:ltr;text-align:center;margin-top:1mm}
