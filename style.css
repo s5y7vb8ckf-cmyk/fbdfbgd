@@ -839,3 +839,24 @@ body{font-family:'Cairo',Tahoma,Arial,sans-serif!important}
 #receipt .milo-order-barcode{display:block;clear:both;text-align:center;margin:3mm auto 1mm;break-inside:avoid;page-break-inside:avoid;max-width:100%;overflow:hidden}
 #receipt .milo-order-barcode svg{display:block;width:96%!important;max-width:100%;height:18mm!important;margin:0 auto;image-rendering:pixelated}
 #receipt .milo-order-barcode-number{font-size:10px;font-weight:700;direction:ltr;text-align:center;margin-top:1mm}
+
+/* V7: understated, formal full-screen login transition. No simulated completion timer. */
+.milo-login-loading{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#f3fbf9 0%,transparent 52%),linear-gradient(160deg,#e9f4f1,#f8fbfa 60%,#e8f1ef);padding:22px;isolation:isolate}
+.milo-login-loading::before{content:"";position:absolute;inset:22px;border:1px solid rgba(13,91,79,.10);border-radius:22px;pointer-events:none}
+.milo-loading-card{width:min(420px,100%);text-align:center;padding:42px 32px 36px;border-radius:22px;background:rgba(255,255,255,.96);box-shadow:0 28px 90px rgba(17,60,53,.13);border:1px solid #dceae5;position:relative}
+.milo-loading-mark{width:94px;height:94px;margin:0 auto 20px;display:grid;place-items:center;position:relative}
+.milo-loading-mark span{width:70px;height:70px;display:grid;place-items:center;background:linear-gradient(155deg,#0a6557,#083e39);color:white;border-radius:21px;font:900 42px Arial,sans-serif;box-shadow:0 12px 30px #0b59472e}
+.milo-loading-mark i{position:absolute;inset:0;border:3px solid #d7e9e2;border-top-color:#087765;border-radius:50%;animation:milo-login-rotate 1.1s linear infinite}
+.milo-loading-kicker{font:800 12px Arial,sans-serif;letter-spacing:3px;color:#087461;direction:ltr}
+.milo-loading-card h2{font-size:23px;font-weight:900;color:#143b36;margin:13px 0 8px}
+.milo-loading-card p{font-size:13px;color:#607971;margin:0 0 25px;min-height:24px}
+.milo-loading-progress{height:5px;background:#e6f0ec;border-radius:99px;overflow:hidden;position:relative}
+.milo-loading-progress span{display:block;height:100%;width:35%;background:linear-gradient(90deg,#087765,#51b49b);border-radius:99px;animation:milo-login-progress 1.5s ease-in-out infinite alternate}
+.milo-loading-foot{font-size:11px;color:#7b928a;margin-top:18px;display:flex;justify-content:center;align-items:center;gap:8px}
+.milo-loading-dot{width:7px;height:7px;background:#159c78;border-radius:50%}
+.milo-loading-copyright{position:absolute;bottom:35px;inset-inline:20px;text-align:center;font-size:11px;font-weight:700;color:#6f8e85}
+@keyframes milo-login-rotate{to{transform:rotate(360deg)}}
+@keyframes milo-login-progress{from{transform:translateX(0)}to{transform:translateX(-170%)}}
+@media(prefers-reduced-motion:reduce){.milo-loading-mark i,.milo-loading-progress span{animation:none}}
+@media(max-width:480px){.milo-loading-card{padding:30px 20px}.milo-loading-card h2{font-size:20px}}
+@media print{.milo-login-loading{display:none!important}}

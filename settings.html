@@ -22,6 +22,18 @@
   <script defer src="direct-print.js?v=360"></script>
 </head>
 <body data-initial-page="settings">
+<!-- Startup overlay: shown only during actual authentication and data loading. -->
+<section id="miloLoginLoading" class="milo-login-loading hidden" aria-live="polite" aria-busy="true" aria-labelledby="miloLoadingTitle" role="status" dir="rtl">
+  <div class="milo-loading-card">
+    <div class="milo-loading-mark" aria-hidden="true"><span>M</span><i></i></div>
+    <div class="milo-loading-kicker">MILO CASHIER</div>
+    <h2 id="miloLoadingTitle">مرحبًا بك في ميلو</h2>
+    <p id="miloLoadingStatus">جارٍ التحقق من بيانات الدخول...</p>
+    <div class="milo-loading-progress" aria-hidden="true"><span></span></div>
+    <div class="milo-loading-foot"><span class="milo-loading-dot"></span> تهيئة بيئة العمل بشكل آمن</div>
+  </div>
+  <div class="milo-loading-copyright">نظام MILO CASHIER · صناعة سعودية</div>
+</section>
 <section id="loginScreen" class="login-screen">
   <div class="login-layout">
     <div class="login-hero">

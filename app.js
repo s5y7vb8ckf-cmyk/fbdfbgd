@@ -3,6 +3,13 @@
    This client intentionally does not claim to fix missing server-side ACL, atomicity or auth. */
 const API_URL=(location.hostname==='127.0.0.1'&&location.port==='37941')?'/api':'https://script.google.com/macros/s/AKfycbwda99M8sV7XlFH9ZhI87cHxSkzSO7YPa3wN6MV7O4YHq-lhiAPx3IWhvr2PjetWK5h/exec';
 const $=id=>document.getElementById(id);
+// Login progress follows real application work; it does not claim success before completion.
+function miloSetLoginLoading(visible,message){const overlay=$('miloLoginLoading');if(!overlay)return;if(message&&$('miloLoadingStatus'))$('miloLoadingStatus').textContent=message;overlay.classList.toggle('hidden',!visible);document.body.classList.toggle('milo-login-pending',!!visible)}
+// Prevent accidental page zoom in the kiosk UI. Browser menu zoom / OS magnifier
+// remain under the browser/OS control; this cannot enforce a true 100% scale.
+function miloPreventPageZoom(){document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&['+','=','-','0','add','subtract'].includes((e.key||'').toLowerCase()))e.preventDefault()}, {capture:true});document.addEventListener('wheel',e=>{if(e.ctrlKey)e.preventDefault()},{passive:false,capture:true});document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});document.addEventListener('gesturechange',e=>e.preventDefault(),{passive:false});}
+miloPreventPageZoom();
+
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const amt=x=>Number(x||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' ر.س';
 const n=x=>{const v=Number(x);return Number.isFinite(v)?v:0};
@@ -256,10 +263,10 @@ function startAccountChecks(){
 document.addEventListener('visibilitychange',()=>{
  if(document.visibilityState==='visible'&&state.auth&&Date.now()-accountCheckLastAt>=ACCOUNT_CHECK_EVERY_MS)void checkAccountStatus();
 });
-async function authenticate(username,password){const resp=await request({action:'login',username,password});if(isAccountRevoked(resp.account)||isAccountRevoked(resp))throw Error('الحساب موقوف أو مغلق. يرجى التواصل مع إدارة النظام.');state.accountLocked=false;$('accountBlockedScreen')?.classList.add('hidden');state.auth={username,password};state.account=resp.account;state.settings={store_name:resp.account?.storeName||'',vat_number:resp.account?.vatNumber||'',phone:resp.account?.phone||'',address:resp.account?.address||'',footer:'شكرًا لزيارتكم',restaurant_mode:'retail'};$('loginScreen').classList.add('hidden');$('app').classList.remove('hidden');$('storeTitle').textContent=resp.account.storeName||'متجر ميلو';$('userName').textContent=resp.account.ownerName||resp.account.username||'حساب المتجر';$('accountMenuOwner').textContent=resp.account.ownerName||resp.account.username||'حساب المتجر';$('accountMenuStore').textContent=resp.account.storeName||'إدارة الحساب';renderBrowserInstallNotice();$('mainNav').innerHTML=menus.map(([key,title,ico],idx)=>{
+async function authenticate(username,password){const resp=await request({action:'login',username,password});miloSetLoginLoading(true,'تم التحقق من الحساب · جارٍ تهيئة المتجر...');if(isAccountRevoked(resp.account)||isAccountRevoked(resp))throw Error('الحساب موقوف أو مغلق. يرجى التواصل مع إدارة النظام.');state.accountLocked=false;$('accountBlockedScreen')?.classList.add('hidden');state.auth={username,password};state.account=resp.account;state.settings={store_name:resp.account?.storeName||'',vat_number:resp.account?.vatNumber||'',phone:resp.account?.phone||'',address:resp.account?.address||'',footer:'شكرًا لزيارتكم',restaurant_mode:'retail'};$('loginScreen').classList.add('hidden');$('app').classList.remove('hidden');$('storeTitle').textContent=resp.account.storeName||'متجر ميلو';$('userName').textContent=resp.account.ownerName||resp.account.username||'حساب المتجر';$('accountMenuOwner').textContent=resp.account.ownerName||resp.account.username||'حساب المتجر';$('accountMenuStore').textContent=resp.account.storeName||'إدارة الحساب';renderBrowserInstallNotice();$('mainNav').innerHTML=menus.map(([key,title,ico],idx)=>{
   const group=idx===0?'الرئيسية':idx===4?'المخزون والتشغيل':idx===8?'الإدارة المالية':idx===14?'الإدارة والنظام':'';
   return (group?`<div class="side-group-label sidebar-label">${group}</div>`:'')+`<button type="button" data-page="${key}" class="side-link ${key==='sale'?'active':''}" title="${esc(title)}" aria-label="${esc(title)}"><span class="side-icon" aria-hidden="true">${MiloIcons.svg(ico)}</span><span class="sidebar-label">${esc(title)}</span></button>`;
- }).join('');await MiloLocal.requestDurableStorage();await restoreCachedSnapshots();await refreshCore();await cacheCoreSnapshots();await showPage(document.body.dataset.initialPage||'sale');await updateQueueBadge();void deviceEvent('open');clearInterval(pollTimer);pollTimer=setInterval(()=>{void syncNow();if(document.visibilityState==='visible')void deviceEvent('heartbeat')},120000);startAccountChecks();void syncNow()}
+ }).join('');await MiloLocal.requestDurableStorage();await restoreCachedSnapshots();miloSetLoginLoading(true,'جارٍ تحميل المنتجات وإعدادات المتجر...');await refreshCore();await cacheCoreSnapshots();miloSetLoginLoading(true,'جارٍ تجهيز نقطة البيع...');await showPage(document.body.dataset.initialPage||'sale');await updateQueueBadge();void deviceEvent('open');clearInterval(pollTimer);pollTimer=setInterval(()=>{void syncNow();if(document.visibilityState==='visible')void deviceEvent('heartbeat')},120000);startAccountChecks();void syncNow()}
 function logout(){closeAccountMenu();if(state.auth)void deviceEvent('close');clearInterval(pollTimer);clearInterval(accountCheckTimer);state.auth=null;state.account=null;state.products=[];state.reports=[];state.cart=[];state.held=[];state.pendingInvoice=null;$('app').classList.add('hidden');$('loginScreen').classList.remove('hidden');$('loginPass').value='';$('loginError').textContent='';connection(false,'غير مسجل');closeModal()}
 async function deviceEvent(type){if(!state.auth)return;try{await api('saveDeviceEvents',{events:[{storeCode:state.account.storeCode,eventId:uid(),deviceCode:deviceCode(),deviceName:state.terminalName,eventType:type,occurredAt:dateTime(),details:'MILO browser'}]})}catch(_){}}
 async function refreshCore(){const settled=await Promise.allSettled([api('products'),api('getStoreSettings'),api('customers'),api('suppliers'),api('shifts')]);const [pr,st,cu,su,sh]=settled;if(pr.status==='fulfilled'){state.products=pr.value.products||[];state.productsRevision=pr.value.productsRevision||'';}if(st.status==='fulfilled')state.settings={...state.settings,...st.value.settings};if(cu.status==='fulfilled')state.customers=cu.value.customers||[];if(su.status==='fulfilled')state.suppliers=su.value.suppliers||[];if(sh.status==='fulfilled')state.shifts=sh.value.shifts||[];state.activeShift=state.shifts.find(x=>!x.closed_at&&String(x.terminal)===terminalId())||null;if(pr.status==='rejected')toast('تعذّر تحديث المنتجات؛ ستبقى البيانات المحفوظة على الجهاز. '+pr.reason.message,true);await cacheCoreSnapshots()}
@@ -553,7 +560,51 @@ function exportReport(){const rows=state.reportCache||[];const headers=['invoice
 /* Cashier shifts */
 async function renderShiftsPage(){const r=await api('shifts');state.shifts=r.shifts||[];state.activeShift=state.shifts.find(x=>!x.closed_at&&String(x.terminal)===terminalId())||null;hdr('الورديات والصندوق','رصيد افتتاحي وإغلاق ومطابقة صندوق كل جهاز',btn('تحديث','reload-page','','secondary'));setContent(`<div class="columns2"><div class="card"><h2>${state.activeShift?'الوردية الحالية مفتوحة':'فتح وردية جديدة'}</h2>${state.activeShift?`<div class="stack">${info('وردية الجهاز: '+state.terminalName,'good')}<p>تاريخ الفتح: ${esc(vDate(state.activeShift.opened_at))}</p><p>رصيد البداية: <b>${amt(state.activeShift.opening_cash)}</b></p><label>النقد الموجود فعليًا<input class="input" id="closingBalance" type="number" min="0" step="0.01" value="0"></label><button class="btn primary" data-action="close-shift" data-commit>حفظ إغلاق الوردية</button></div>`:`<div class="stack"><label>المبلغ النقدي الابتدائي<input class="input" id="startingBalance" type="number" min="0" step="0.01" value="0"></label><button class="btn primary" data-action="open-shift" data-commit>فتح الوردية</button></div>`}</div><div class="card"><h2>ملخص</h2><p>الجهاز: <b>${esc(state.terminalName)}</b></p><p>كود الجهاز: <small>${esc(terminalId())}</small></p><p class="small-note">حساب حركة الوردية يستند إلى سجلات Reports خلال الفترة. لا تُجرِ عمليات قفل متعدد الكاشيرات دون ترقية التحقق الخادمي.</p></div></div><div class="panel" style="margin-top:15px"><h2>سجل الورديات</h2>${tabular(['الجهاز','تاريخ الفتح','الإغلاق','بداية الصندوق','نهاية الصندوق','الحالة'],state.shifts.slice().reverse().map(s=>`<tr><td>${esc(s.terminal)}</td><td>${esc(vDate(s.opened_at))}</td><td>${s.closed_at?esc(vDate(s.closed_at)):'—'}</td><td>${amt(s.opening_cash)}</td><td>${s.closed_at?amt(s.closing_cash):'—'}</td><td><span class="tag ${s.closed_at?'':'amber'}">${s.closed_at?'مغلقة':'مفتوحة'}</span></td></tr>`).join(''))}</div>`)}
 async function openShift(){const start=n($('startingBalance')?.value);if(start<0)throw Error('رصيد افتتاحي غير صالح');const shift={shift_id:uid(),terminal:terminalId(),cashier:state.account.username,opened_at:dateTime(),closed_at:'',opening_cash:start,closing_cash:0,expected_cash:start,invoice_count:0,cash_sales:0,card_sales:0,total_sales:0,vat:0,discount:0};await api('saveShifts',{shifts:[shift]});await renderShiftsPage();toast('تم فتح الوردية على الخادم')}
-async function closeShift(){const shift=state.activeShift;if(!shift)throw Error('لا توجد وردية مفتوحة');const amount=n($('closingBalance')?.value);if(amount<0)throw Error('المبلغ النقدي غير صحيح');const records=await loadInvoices(String(shift.opened_at).slice(0,10),isoDay());const within=records.filter(i=>String(i.terminal)===terminalId()&&new Date(i.date).getTime()>=new Date(shift.opened_at).getTime());const cash=within.reduce((s,x)=>s+n(x.cash)-n(x.change),0);const card=within.reduce((s,x)=>s+n(x.card),0);const full={...shift,closed_at:dateTime(),closing_cash:amount,expected_cash:rnd(n(shift.opening_cash)+cash),invoice_count:within.length,cash_sales:rnd(cash),card_sales:rnd(card),total_sales:rnd(within.reduce((s,x)=>s+n(x.total),0)),vat:rnd(within.reduce((s,x)=>s+n(x.vat),0)),discount:rnd(within.reduce((s,x)=>s+n(x.discount),0))};await api('saveShifts',{shifts:[full]});await renderShiftsPage();toast('تم إغلاق الوردية. الفرق '+amt(amount-full.expected_cash));if(printPrefs().shiftReport)queueReceiptHtml(shiftReportHtml(full,printPrefs().paper),printPrefs().paper)}
+// Shift totals must be confirmed against remote invoices BEFORE closing.
+// The server returns UTC ISO timestamps as well as historical Sheets timestamps;
+// normalize both, and expand the day query to avoid missing midnight boundaries.
+function miloShiftTime(value){
+ const valueText=String(value??'').trim();
+ if(!valueText)return NaN;
+ const parsed=Date.parse(valueText);
+ if(Number.isFinite(parsed))return parsed;
+ // Sheets sometimes returns yyyy-MM-dd HH:mm:ss without a timezone.
+ const match=valueText.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})$/);
+ return match?Date.parse(match[1]+'T'+match[2]+'+03:00'):NaN;
+}
+function miloShiftDay(time){return new Date(time).toISOString().slice(0,10)}
+async function closeShift(){
+ const shift=state.activeShift;
+ if(!shift)throw Error('لا توجد وردية مفتوحة');
+ const amount=n($('closingBalance')?.value);
+ if(amount<0)throw Error('المبلغ النقدي غير صحيح');
+ const opened=miloShiftTime(shift.opened_at);
+ if(!Number.isFinite(opened))throw Error('تاريخ فتح الوردية غير قابل للقراءة، لم يتم إغلاقها');
+ const current=Date.now();
+ const from=miloShiftDay(opened-86400000),to=miloShiftDay(current+86400000);
+ const records=await loadInvoices(from,to);
+ if(!Array.isArray(records))throw Error('تعذر جلب سجلات المبيعات. لم يتم إغلاق الوردية');
+ const during=records.filter(i=>{const time=miloShiftTime(i.date);return Number.isFinite(time)&&time>=opened-1000&&time<=current+60000});
+ const own=during.filter(i=>String(i.terminal||'').trim()===String(shift.terminal||'').trim());
+ const pending=window.MiloLocal&&state.account?await MiloLocal.list(state.account).catch(()=>null):[];
+ if(pending===null)throw Error('تعذر فحص الفواتير المحلية المعلقة. لم يتم إغلاق الوردية');
+ const pendingCount=(pending||[]).filter(x=>miloShiftTime(x.invoice?.date)>=opened-1000).length;
+ if(pendingCount)throw Error('هناك '+pendingCount+' فاتورة محلية معلقة لم تعتمد بعد. زامنها أو راجعها قبل إغلاق الوردية، حتى لا ينقص التقرير');
+ if(during.length && !own.length){
+  const codes=[...new Set(during.map(i=>String(i.terminal||'غير مسجل')))].slice(0,4).join('، ');
+  throw Error('تم العثور على '+during.length+' فاتورة خلال الوردية، لكن رمز جهازها لا يطابق الوردية الحالية. رموز الفواتير: '+codes+'؛ رمز الوردية: '+shift.terminal+'. لم يتم الإغلاق لحماية الأرقام');
+ }
+ if(own.some(i=>!Number.isFinite(n(i.total))))throw Error('بيانات مبيعات غير مكتملة. لم يتم إغلاق الوردية');
+ const cash=own.reduce((s,x)=>s+n(x.cash)-n(x.change),0);
+ const card=own.reduce((s,x)=>s+n(x.card),0);
+ const full={...shift,closed_at:dateTime(),closing_cash:amount,expected_cash:rnd(n(shift.opening_cash)+cash),invoice_count:own.length,cash_sales:rnd(cash),card_sales:rnd(card),total_sales:rnd(own.reduce((s,x)=>s+n(x.total),0)),vat:rnd(own.reduce((s,x)=>s+n(x.vat),0)),discount:rnd(own.reduce((s,x)=>s+n(x.discount),0))};
+ if(!own.length&&!window.confirm('لم يجد النظام أي فواتير معتمدة لهذه الوردية. هل أنت متأكد أن الوردية بلا مبيعات وتريد إغلاقها بصفر؟'))return;
+ if(own.length&&!window.confirm('تأكيد إغلاق الوردية: '+own.length+' فاتورة، المبيعات '+amt(full.total_sales)+'، النقد '+amt(full.cash_sales)+'، الشبكة '+amt(full.card_sales)+'. هل الأرقام صحيحة؟'))return;
+ await api('saveShifts',{shifts:[full]});
+ await renderShiftsPage();
+ toast('تم إغلاق الوردية. الفرق '+amt(amount-full.expected_cash));
+ if(printPrefs().shiftReport)queueReceiptHtml(shiftReportHtml(full,printPrefs().paper),printPrefs().paper);
+}
 
 /* Manual orders: printable, device-session only, excluded from sales as requested. */
 function renderManualPage(){hdr('الطلبات اليدوية','تذاكر مستقلة لا تُضاف إلى المبيعات',btn('طلب يدوي جديد','new-manual','','primary'));setContent(`<div class="panel">${info('الطلبات اليدوية في هذه النسخة تُحفظ خلال جلسة المتصفح فقط. خادمك الحالي لا يتضمن جدولًا أو مسارًا لحفظ الطلبات اليدوية على السحابة.')} ${tabular(['رقم الطلب','التاريخ','العميل','الملاحظات','الطباعة'],state.manualOrders.map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(vDate(o.date))}</td><td>${esc(o.customer)}</td><td>${esc(o.notes)}</td><td>${btn('طباعة التذكرة','print-manual',o.id,'secondary')}</td></tr>`).join(''))}</div>`)}
@@ -629,7 +680,7 @@ $('sidebarToggle')?.addEventListener('click',toggleSidebar);
 $('sidebarScrim')?.addEventListener('click',closeMobileSidebar);
 window.addEventListener('resize',()=>{if(!sidebarIsMobile())document.body.classList.remove('mobile-menu-open');syncSidebarToggle()});
 syncSidebarToggle();
-$('loginForm').addEventListener('submit',async ev=>{ev.preventDefault();const button=$('loginBtn');button.disabled=true;$('loginError').textContent='';try{await authenticate($('loginUser').value.trim(),$('loginPass').value)}catch(e){$('loginError').textContent=e.message;toast(e.message,true)}finally{button.disabled=false}});
+$('loginForm').addEventListener('submit',async ev=>{ev.preventDefault();const button=$('loginBtn');if(button.disabled)return;button.disabled=true;$('loginError').textContent='';miloSetLoginLoading(true,'جارٍ التحقق من بيانات الدخول...');try{await authenticate($('loginUser').value.trim(),$('loginPass').value)}catch(e){$('loginError').textContent=e.message;toast(e.message,true)}finally{miloSetLoginLoading(false);button.disabled=false}});
 document.addEventListener('click',ev=>{const preset=ev.target.closest('[data-report-preset]');if(preset){Promise.resolve(reportPreset(preset.dataset.reportPreset)).catch(e=>toast(e.message,true));return;}const nav=ev.target.closest('[data-page]');if(nav){showPage(nav.dataset.page);if(sidebarIsMobile())closeMobileSidebar();return}const b=ev.target.closest('[data-action]');if(b&&!b.disabled){Promise.resolve(onAction(b.dataset.action,b.dataset.id,b)).catch(e=>toast(e.message,true))}});
 document.addEventListener('submit',ev=>{if(ev.target.id==='supportForm'){ev.preventDefault();sendTicket().catch(e=>toast(e.message,true))}});
 document.addEventListener('change',async ev=>{if(ev.target?.id==='receiptLogoPicker'){try{await chooseReceiptLogo(ev.target.files?.[0]);toast('تم حفظ شعار الفاتورة على هذا الجهاز')}catch(e){toast(e.message,true)}}});
