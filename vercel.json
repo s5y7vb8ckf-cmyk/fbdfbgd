@@ -2,7 +2,7 @@
   "version": 2,
   "headers": [
     {
-      "source": "/manifest-v16.webmanifest",
+      "source": "/manifest-v17.webmanifest",
       "headers": [
         {
           "key": "Content-Type",
