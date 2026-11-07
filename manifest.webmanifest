@@ -11,19 +11,19 @@
   "theme_color": "#008f88",
   "icons": [
     {
-      "src": "icons/milo-v15-192.png",
+      "src": "icons/milo-v16-192.png?v=16",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/milo-v15-512.png",
+      "src": "icons/milo-v16-512.png?v=16",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/milo-v15-maskable-512.png",
+      "src": "icons/milo-v16-maskable-512.png?v=16",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
